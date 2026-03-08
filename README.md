@@ -1,328 +1,89 @@
-# {PROJECT_NAME}
+# R3GROUP — Katty Fashion Digital Manufacturing Platform
 
-> {PROJECT_DESCRIPTION}
-
-## Quick Links
-
-- [KF Dashboard](https://katty-fashion.github.io/kf-cpto/) — Unified project view
-- [Project Page](https://katty-fashion.github.io/kf-cpto/projects/{project-name}/) — Auto-generated from kanban
-- [Unified Kanban](https://katty-fashion.github.io/kf-cpto/unified-kanban.html) — All tasks across KF Team
+> Katty Fashion pilot implementation for the **R3GROUP Horizon Europe project**, enabling resilient and rapidly reconfigurable garment production through Digital Twins and AAS-based manufacturing architecture.
 
 ---
 
-## Architecture
+# Quick Links
 
-### High-Level Design (HLD) — Sequence Flow
+- KF Team Dashboard  
+https://katty-fashion.github.io/kf-cpto/
+
+- Unified Kanban  
+https://katty-fashion.github.io/kf-cpto/unified-kanban.html
+
+- R3GROUP Project (CORDIS)  
+https://cordis.europa.eu/project/id/101091869
+
+---
+
+# Project Overview
+
+**R3GROUP (Resilient Rapid Reconfigurable Production Process Chains)** is a Horizon Europe research project aimed at enabling **flexible, digital, and resilient manufacturing ecosystems**.
+
+The project focuses on:
+
+- rapid reconfiguration of production systems
+- digital integration between design and manufacturing
+- interoperability across supply chain partners
+- human-centered manufacturing environments.
+
+The **Katty Fashion pilot** demonstrates these capabilities within the **garment manufacturing industry**, integrating digital tools across the full product lifecycle.
+
+---
+
+# Core Digital Concepts
+
+The platform integrates several Industry 4.0 concepts:
+
+### Digital Twin
+Digital representation of:
+
+- garments
+- manufacturing processes
+- production resources
+
+### Asset Administration Shell (AAS)
+
+Standardized digital interface representing assets in the manufacturing system.
+
+Allows interoperability between:
+
+- machines
+- software systems
+- digital twins.
+
+### Digital Thread
+
+Continuous data flow connecting:
+
+- design
+- production planning
+- manufacturing execution
+- product lifecycle monitoring.
+
+---
+
+# Platform Architecture
+
+## System Architecture Overview
 
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant API Gateway
-    participant Service
-    participant Database
-    participant Cache
-    participant External API
+graph TD
 
-    Client->>API Gateway: HTTP Request
-    API Gateway->>API Gateway: Auth / Rate Limit
-    API Gateway->>Service: Forward Request
+A[Designer] --> B[Co-Creation Platform]
+B --> C[API Gateway]
 
-    Service->>Cache: Check Cache
-    alt Cache Hit
-        Cache-->>Service: Return Cached Data
-    else Cache Miss
-        Service->>Database: Query Data
-        Database-->>Service: Return Data
-        Service->>Cache: Store in Cache
-    end
+C --> D[Product Digital Twin]
+C --> E[Process Digital Twin]
+C --> F[Capacity Planner]
 
-    opt External Integration
-        Service->>External API: API Call
-        External API-->>Service: Response
-    end
+D --> G[(Digital Product Data)]
+E --> H[(Process Models)]
+F --> I[(Planning Database)]
 
-    Service-->>API Gateway: Response
-    API Gateway-->>Client: HTTP Response
-```
+D --> J[AAS Layer]
+E --> J
+F --> J
 
-### Backend Service Anatomy
-
-Every backend service/container follows this standard architecture:
-
-```mermaid
-block-beta
-    columns 3
-
-    block:external:3
-        A["API Layer (REST/GraphQL)"]
-    end
-
-    block:infra:3
-        B["Networking"] C["Auth/Security"] D["Config"]
-    end
-
-    block:core:3
-        E["Business Logic / Feature Code"]
-    end
-
-    block:observability:3
-        F["Observability"] G["Telemetry"] H["Logging"]
-    end
-
-    block:io:3
-        I["Database"] J["Cache"] K["Message Queue"]
-    end
-
-    block:output:3
-        L["stdout"] M["stderr"] N["Metrics Endpoint"]
-    end
-```
-
-**Layer Responsibilities:**
-
-| Layer | Components | Purpose |
-| :--- | :--- | :--- |
-| **API Layer** | REST endpoints, GraphQL resolvers | External interface |
-| **Infrastructure** | Network config, TLS, CORS, Auth middleware | Cross-cutting concerns |
-| **Business Logic** | Domain models, services, handlers | Your feature code |
-| **Observability** | OpenTelemetry, Prometheus, structured logs | Monitoring & debugging |
-| **I/O** | PostgreSQL, Redis, RabbitMQ/Kafka | Data persistence & messaging |
-| **Output** | stdout (logs), stderr (errors), /metrics | Container output streams |
-
-**Minimum Requirements for Production:**
-
-```yaml
-# Every service must have:
-observability:
-  - health_check: /health
-  - readiness: /ready
-  - metrics: /metrics (Prometheus format)
-  - tracing: OpenTelemetry spans
-
-logging:
-  - format: JSON structured
-  - output: stdout (info), stderr (errors)
-  - correlation_id: request tracing
-
-config:
-  - env_vars: 12-factor app
-  - secrets: mounted from vault/k8s secrets
-  - feature_flags: runtime toggles
-```
-
-### Frontend (React Web) Anatomy
-
-```mermaid
-block-beta
-    columns 3
-
-    block:entry:3
-        A["Entry Point (main.tsx)"]
-    end
-
-    block:routing:3
-        B["Router (React Router / Next.js)"]
-    end
-
-    block:state:3
-        C["State Management"] D["API Client"] E["Auth Context"]
-    end
-
-    block:ui:3
-        F["Pages / Views"]
-    end
-
-    block:components:3
-        G["Components"] H["Hooks"] I["Utils"]
-    end
-
-    block:infra:3
-        J["Design System"] K["i18n"] L["Analytics"]
-    end
-```
-
-**Frontend Layer Responsibilities:**
-
-| Layer | Components | Purpose |
-| :--- | :--- | :--- |
-| **Entry** | main.tsx, App.tsx | Bootstrap application |
-| **Routing** | React Router, layouts | Navigation & URL mapping |
-| **State** | Redux/Zustand, React Query, Context | Data management |
-| **Pages** | Route components, views | Screen-level components |
-| **Components** | Reusable UI, hooks, utilities | Building blocks |
-| **Infrastructure** | Theme, translations, tracking | Cross-cutting concerns |
-
-**Frontend Checklist:**
-
-```yaml
-# Every React app must have:
-performance:
-  - code_splitting: lazy loading routes
-  - bundle_size: < 200KB initial JS
-  - lighthouse: > 90 score
-
-observability:
-  - error_boundary: global error catching
-  - analytics: page views, events
-  - source_maps: uploaded to error tracker
-
-security:
-  - csp: Content Security Policy
-  - auth: token refresh, secure storage
-  - sanitization: XSS prevention
-```
-
----
-
-## Kanban Management
-
-This repository uses a `kanban.md` file for task tracking that integrates with the [KF-CPTO Dashboard](https://github.com/katty-fashion/kf-cpto).
-
-### Updating Tasks
-
-Edit `kanban.md` in the repository root:
-
-```markdown
----
-project: {project-name}
-sprint: S3
-sprint_start: 2026-03-02
-sprint_end: 2026-03-13
----
-
-# Project Kanban
-
-| Task | Assignee | Effort | Status |
-| :--- | :--- | :--- | :--- |
-| Implement feature X | @developer | 3d | In Progress |
-| Code review for Y | @reviewer | 1d | Review |
-| Deploy to staging | @devops | 2d | Todo |
-```
-
-### Task Status Values
-
-| Status | Description |
-| :--- | :--- |
-| `Todo` | Not started |
-| `In Progress` | Currently being worked on |
-| `Review` | Awaiting code review or approval |
-| `Done` | Completed |
-
-### Effort Format
-
-Use `Nd` format where N is the number of days:
-- `1d` — 1 day
-- `0.5d` — Half day
-- `3d` — 3 days
-
-### Sprint Updates
-
-Update the frontmatter at the start of each sprint:
-
-```yaml
----
-project: {project-name}
-sprint: S4              # Increment sprint number
-sprint_start: 2026-03-16  # New sprint start
-sprint_end: 2026-03-27    # New sprint end
----
-```
-
----
-
-## Development
-
-### Prerequisites
-
-```bash
-# Required tools
-- Python 3.11+ / Node.js 20+
-- Docker & Docker Compose
-- kubectl (for K8s deployments)
-```
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/katty-fashion/{project-name}.git
-cd {project-name}
-
-# Install dependencies
-# Add project-specific setup commands here
-```
-
-### Running Locally
-
-```bash
-# Add project-specific run commands here
-```
-
-### Testing
-
-```bash
-# Add project-specific test commands here
-```
-
----
-
-## Project Structure
-
-```
-{project-name}/
-├── kanban.md              # Task tracking (synced to KF-CPTO)
-├── README.md              # This file
-├── .github/
-│   └── workflows/
-│       └── notify-kf-cpto.yml  # Auto-sync to dashboard
-├── src/                   # Source code
-│   ├── api/               # API layer (routes, controllers)
-│   ├── services/          # Business logic
-│   ├── models/            # Data models
-│   ├── config/            # Configuration
-│   └── utils/             # Utilities
-├── tests/                 # Test suites
-├── docs/                  # Documentation
-├── Dockerfile             # Container definition
-└── docker-compose.yml     # Local dev environment
-```
-
----
-
-## KF-CPTO Integration
-
-### Automatic Sync
-
-When you push changes to `kanban.md`, the KF-CPTO dashboard automatically updates via GitHub Actions.
-
-### Manual Trigger
-
-```bash
-# Via GitHub CLI
-gh workflow run notify-kf-cpto.yml
-```
-
----
-
-## Contributing
-
-1. Create a feature branch: `git checkout -b feature/my-feature`
-2. Update `kanban.md` with your task
-3. Make your changes
-4. Update task status in `kanban.md`
-5. Commit and push
-6. Create a Pull Request
-
----
-
-## Team
-
-| Role | Contact |
-| :--- | :--- |
-| Project Lead | @{lead} |
-| Tech Lead | @{tech-lead} |
-| Team | @katty-fashion/{project-name} |
-
----
-
-*Part of [KF Team](https://github.com/katty-fashion) · Managed via [KF-CPTO](https://github.com/katty-fashion/kf-cpto)*
+J --> K[Manufacturing Systems]
